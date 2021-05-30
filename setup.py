@@ -6,4 +6,5 @@ setup(
     install_requires=["ccxt"],
     packages=find_packages(),
     entry_points={"console_scripts": ["cx=cx:main"]},
+    python_requires=">=3.6",
 )

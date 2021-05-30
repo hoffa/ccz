@@ -68,7 +68,7 @@ class Client:
 
 def command_balance(client: Client, args: Namespace) -> None:
     for currency, amount in client.get_balance():
-        print(f"{currency}\t{amount}")
+        print(f"{currency}\t{amount:.2f}")
 
 
 def command_buy(client: Client, args: Namespace) -> None:

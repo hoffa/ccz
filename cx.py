@@ -30,6 +30,16 @@ def command_sell(client, args):
     client.create_market_sell_order(args.symbol, args.amount)
 
 
+def command_bid(client, args):
+    ticker = client.fetch_ticker(args.symbol)
+    print_float(ticker["bid"])
+
+
+def command_ask(client, args):
+    ticker = client.fetch_ticker(args.symbol)
+    print_float(ticker["ask"])
+
+
 def command_price(client, args):
     ticker = client.fetch_ticker(args.symbol)
     price = ticker[args.side]
@@ -59,6 +69,14 @@ def main():
     parser_sell.add_argument("symbol")
     parser_sell.add_argument("amount", type=float)
     parser_sell.set_defaults(func=command_sell)
+
+    parser_ask = subparsers.add_parser("ask")
+    parser_ask.add_argument("symbol")
+    parser_ask.set_defaults(func=command_ask)
+
+    parser_bid = subparsers.add_parser("bid")
+    parser_bid.add_argument("symbol")
+    parser_bid.set_defaults(func=command_bid)
 
     parser_price = subparsers.add_parser("price")
     parser_price.add_argument("direction", choices=("base", "quote"))

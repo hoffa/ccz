@@ -9,7 +9,6 @@ from typing import Dict, Iterator, Tuple
 import ccxt  # type: ignore
 
 
-# TODO: Cache tickers
 # TODO: buy-all
 # TODO: sell-all
 # TODO: Sometimes failures hidden; e.g. cx buy xrp 10
@@ -23,7 +22,7 @@ class Client:
 
     def _get_currencies(self) -> Iterator[str]:
         for symbol in self.client.symbols:
-            base, quote = self.parse_symbol(symbol)
+            base, quote = self._parse_symbol(symbol)
             if quote == self.quote:
                 yield base
 
@@ -39,7 +38,7 @@ class Client:
             if currency == self.quote:
                 total += amount
             elif currency in currencies:
-                symbol = self.get_symbol(currency)
+                symbol = self._get_symbol(currency)
                 bid, _ = self._get_ticker(symbol)
                 quote_amount = amount * bid
                 yield currency, quote_amount
@@ -48,23 +47,23 @@ class Client:
         yield "Total", total
 
     def buy(self, currency: str, amount: float) -> None:
-        symbol = self.get_symbol(currency)
+        symbol = self._get_symbol(currency)
         _, ask = self._get_ticker(symbol)
         base_amount = amount / ask
         self.client.create_market_buy_order(symbol, base_amount)
 
     def sell(self, currency: str, amount: float) -> None:
-        symbol = self.get_symbol(currency)
+        symbol = self._get_symbol(currency)
         bid, _ = self._get_ticker(symbol)
         base_amount = amount / bid
         self.client.create_market_sell_order(symbol, base_amount)
 
     @staticmethod
-    def parse_symbol(symbol: str) -> Tuple[str, str]:
+    def _parse_symbol(symbol: str) -> Tuple[str, str]:
         base, quote = symbol.split("/")
         return base, quote
 
-    def get_symbol(self, currency: str) -> str:
+    def _get_symbol(self, currency: str) -> str:
         return f"{currency}/{self.quote}"
 
 

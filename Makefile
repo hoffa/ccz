@@ -4,3 +4,6 @@ all:
 	.venv/bin/black .
 	.venv/bin/flake8 --ignore E501 cx
 	.venv/bin/mypy --strict cx
+
+clean:
+	rm -rf .venv

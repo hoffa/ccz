@@ -7,8 +7,7 @@ All prices are in a fixed quote currency.
 ## Installation
 
 ```bash
-cd "$(mktemp -d)"
-git clone https://github.com/hoffa/cx.git .
+git clone https://github.com/hoffa/cx.git
 python3 setup.py install
 ```
 

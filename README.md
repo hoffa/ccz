@@ -4,6 +4,14 @@ Intuitive cryptocurrency trading.
 
 All prices are in a fixed quote currency.
 
+## Installation
+
+```bash
+git clone https://github.com/hoffa/cx.git
+cd cx
+python setup.py install
+```
+
 ## Setup
 
 Create a `config.json` with the exchange configuration:

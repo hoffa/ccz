@@ -27,7 +27,8 @@ Create a `config.json` with the exchange configuration:
 }
 ```
 
-`exchange` is the exchange ID as defined by [CCXT](https://github.com/ccxt/ccxt). See [CCXT docs](https://github.com/ccxt/ccxt/wiki/Manual#api-keys-setup) for `auth` structure.
+- `exchange` is the [CCXT exchange ID](https://github.com/ccxt/ccxt/wiki/Exchange-Markets).
+- See [CCXT docs](https://github.com/ccxt/ccxt/wiki/Manual#api-keys-setup) for the `auth` structure.
 
 ## Trading
 

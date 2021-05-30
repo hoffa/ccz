@@ -19,7 +19,7 @@ Create a `config.json` with the exchange configuration:
 }
 ```
 
-`exchange` is the exchange ID as by [CCXT](https://github.com/ccxt/ccxt).
+`exchange` is the exchange ID as defined by [CCXT](https://github.com/ccxt/ccxt).
 
 ## Trading
 

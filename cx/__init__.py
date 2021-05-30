@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 from argparse import Namespace
-from typing import Dict, Iterator, Tuple
+from typing import cast, Dict, Iterator, Tuple
 
 import ccxt  # type: ignore
 
@@ -13,7 +13,7 @@ import ccxt  # type: ignore
 # TODO: sell-all
 # TODO: Sometimes failures hidden; e.g. cx buy xrp 10
 class Client:
-    """Designed for intuitive fiat trading."""
+    """Assumes currencies and symbols have correct capitalization."""
 
     def __init__(self, exchange: str, auth: Dict[str, str], quote: str) -> None:
         self.client = getattr(ccxt, exchange)(auth)
@@ -30,10 +30,13 @@ class Client:
         ticker = self.client.fetch_ticker(symbol)
         return ticker["bid"], ticker["ask"]
 
+    def _get_balance(self) -> Dict[str, float]:
+        return cast(Dict[str, float], self.client.fetch_balance()["free"])
+
     def get_balance(self) -> Iterator[Tuple[str, float]]:
         currencies = list(self._get_currencies())
         total = 0
-        balance = self.client.fetch_balance()["free"]
+        balance = self._get_balance()
         for currency, amount in sorted(balance.items()):
             if currency == self.quote:
                 total += amount
@@ -52,10 +55,14 @@ class Client:
         base_amount = amount / ask
         self.client.create_market_buy_order(symbol, base_amount)
 
-    def sell(self, currency: str, amount: float) -> None:
+    def sell(self, currency: str, amount: float, percentage: bool) -> None:
         symbol = self._get_symbol(currency)
-        bid, _ = self._get_ticker(symbol)
-        base_amount = amount / bid
+        if percentage:
+            balance = self._get_balance()[currency]
+            base_amount = balance * (amount / 100)
+        else:
+            bid, _ = self._get_ticker(symbol)
+            base_amount = amount / bid
         self.client.create_market_sell_order(symbol, base_amount)
 
     @staticmethod
@@ -77,12 +84,12 @@ def command_buy(client: Client, args: Namespace) -> None:
 
 
 def command_sell(client: Client, args: Namespace) -> None:
-    client.sell(args.currency.upper(), args.amount)
+    client.sell(args.currency.upper(), args.amount, args.percentage)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config", default="config.json")
+    parser.add_argument("-c", dest="config", default="config.json")
     subparsers = parser.add_subparsers(dest="cmd")
 
     parser_balance = subparsers.add_parser("balance")
@@ -96,6 +103,7 @@ def main() -> None:
     parser_sell = subparsers.add_parser("sell")
     parser_sell.add_argument("currency")
     parser_sell.add_argument("amount", type=float)
+    parser_sell.add_argument("-p", dest="percentage", action="store_true")
     parser_sell.set_defaults(func=command_sell)
 
     args = parser.parse_args()

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
-from argparse import Namespace
 import json
+import sys
+from argparse import Namespace
+from typing import Dict, Iterator, Tuple
 
 import ccxt  # type: ignore
-
-from typing import Dict, Iterator, Tuple
 
 
 # TODO: Cache tickers
@@ -82,7 +82,7 @@ def command_sell(client: Client, args: Namespace) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="config.json")
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest="cmd")
 
     parser_balance = subparsers.add_parser("balance")
     parser_balance.set_defaults(func=command_balance)
@@ -98,6 +98,10 @@ def main() -> None:
     parser_sell.set_defaults(func=command_sell)
 
     args = parser.parse_args()
+
+    if not args.cmd:
+        parser.print_usage()
+        sys.exit(1)
 
     with open(args.config) as f:
         config = json.load(f)

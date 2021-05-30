@@ -35,7 +35,7 @@ class Client:
         total = 0
         balance = self.client.fetch_balance()["free"]
         yield self.quote, balance[self.quote]
-        for currency, amount in balance.items():
+        for currency, amount in sorted(balance.items()):
             if currency == self.quote:
                 total += amount
             elif currency in currencies:

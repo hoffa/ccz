@@ -33,9 +33,10 @@ class Client:
     def get_balance(self) -> Iterator[Tuple[str, float]]:
         currencies = list(self._get_currencies())
         total = 0
-        for currency, amount in self.client.fetch_balance()["free"].items():
+        balance = self.client.fetch_balance()["free"]
+        yield self.quote, balance[self.quote]
+        for currency, amount in balance.items():
             if currency == self.quote:
-                yield currency, amount
                 total += amount
             elif currency in currencies:
                 symbol = self.get_symbol(currency)

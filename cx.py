@@ -6,77 +6,77 @@ import json
 
 import ccxt  # type: ignore
 
-from dataclasses import dataclass
-from typing import cast, Dict, List
+from typing import Dict, Iterator, Tuple
 
 
-@dataclass
-class Ticker:
-    bid: float
-    ask: float
-
-
+# TODO: Cache tickers
+# TODO: buy-all
+# TODO: sell-all
 class Client:
-    def __init__(self, exchange: str, auth: Dict[str, str]) -> None:
+    """Designed for intuitive fiat trading."""
+
+    def __init__(self, exchange: str, auth: Dict[str, str], quote: str) -> None:
         self.client = getattr(ccxt, exchange)(auth)
-
-    def get_balance(self) -> Dict[str, float]:
-        return cast(Dict[str, float], self.client.fetch_balance()["free"])
-
-    def get_symbols(self) -> List[str]:
         self.client.load_markets()
-        return cast(List[str], self.client.symbols)
+        self.quote = quote
 
-    def get_ticker(self, symbol: str) -> Ticker:
+    def _get_currencies(self) -> Iterator[str]:
+        for symbol in self.client.symbols:
+            base, quote = self.parse_symbol(symbol)
+            if quote == self.quote:
+                yield base
+
+    def _get_ticker(self, symbol: str) -> Tuple[float, float]:
         ticker = self.client.fetch_ticker(symbol)
-        return Ticker(ticker["bid"], ticker["ask"])
+        return ticker["bid"], ticker["ask"]
 
-    def buy(self, symbol: str, amount: float) -> None:
-        self.client.create_market_buy_order(symbol, amount)
+    def get_balance(self) -> Iterator[Tuple[str, float]]:
+        currencies = list(self._get_currencies())
+        total = 0
+        for currency, amount in self.client.fetch_balance()["free"].items():
+            if currency == self.quote:
+                yield currency, amount
+                total += amount
+            elif currency in currencies:
+                symbol = self.get_symbol(currency)
+                bid, _ = self._get_ticker(symbol)
+                quote_amount = amount * bid
+                yield currency, quote_amount
+                total += quote_amount
+        yield "Total", total
 
-    def sell(self, symbol: str, amount: float) -> None:
-        self.client.create_market_sell_order(symbol, amount)
+    def buy(self, currency: str, amount: float) -> None:
+        symbol = self.get_symbol(currency)
+        _, ask = self._get_ticker(symbol)
+        base_amount = amount / ask
+        self.client.create_market_buy_order(symbol, base_amount)
 
+    def sell(self, currency: str, amount: float) -> None:
+        symbol = self.get_symbol(currency)
+        bid, _ = self._get_ticker(symbol)
+        base_amount = amount / bid
+        self.client.create_market_sell_order(symbol, base_amount)
 
-def print_float(x: float) -> None:
-    print(f"{x:.6f}")
+    @staticmethod
+    def parse_symbol(symbol: str) -> Tuple[str, str]:
+        base, quote = symbol.split("/")
+        return base, quote
+
+    def get_symbol(self, currency: str) -> str:
+        return f"{currency}/{self.quote}"
 
 
 def command_balance(client: Client, args: Namespace) -> None:
-    for currency, amount in client.get_balance().items():
+    for currency, amount in client.get_balance():
         print(f"{currency}\t{amount}")
 
 
-def command_symbols(client: Client, args: Namespace) -> None:
-    for symbol in client.get_symbols():
-        print(symbol)
-
-
 def command_buy(client: Client, args: Namespace) -> None:
-    client.buy(args.symbol, args.amount)
+    client.buy(args.currency, args.amount)
 
 
 def command_sell(client: Client, args: Namespace) -> None:
     client.sell(args.symbol, args.amount)
-
-
-def command_bid(client: Client, args: Namespace) -> None:
-    ticker = client.get_ticker(args.symbol)
-    print_float(ticker.bid)
-
-
-def command_ask(client: Client, args: Namespace) -> None:
-    ticker = client.get_ticker(args.symbol)
-    print_float(ticker.ask)
-
-
-def command_price(client: Client, args: Namespace) -> None:
-    ticker = client.get_ticker(args.symbol)
-    price = ticker.bid if args.side == "bid" else ticker.ask
-    if args.direction == "base":
-        print_float(args.amount / price)
-    else:
-        print_float(args.amount * price)
 
 
 def main() -> None:
@@ -87,11 +87,8 @@ def main() -> None:
     parser_balance = subparsers.add_parser("balance")
     parser_balance.set_defaults(func=command_balance)
 
-    parser_symbols = subparsers.add_parser("symbols")
-    parser_symbols.set_defaults(func=command_symbols)
-
     parser_buy = subparsers.add_parser("buy")
-    parser_buy.add_argument("symbol")
+    parser_buy.add_argument("currency")
     parser_buy.add_argument("amount", type=float)
     parser_buy.set_defaults(func=command_buy)
 
@@ -100,26 +97,11 @@ def main() -> None:
     parser_sell.add_argument("amount", type=float)
     parser_sell.set_defaults(func=command_sell)
 
-    parser_ask = subparsers.add_parser("ask")
-    parser_ask.add_argument("symbol")
-    parser_ask.set_defaults(func=command_ask)
-
-    parser_bid = subparsers.add_parser("bid")
-    parser_bid.add_argument("symbol")
-    parser_bid.set_defaults(func=command_bid)
-
-    parser_price = subparsers.add_parser("price")
-    parser_price.add_argument("direction", choices=("base", "quote"))
-    parser_price.add_argument("side", choices=("bid", "ask"))
-    parser_price.add_argument("symbol")
-    parser_price.add_argument("amount", type=float)
-    parser_price.set_defaults(func=command_price)
-
     args = parser.parse_args()
 
     with open(args.config) as f:
         config = json.load(f)
-    client = Client(config["exchange"], config["auth"])
+    client = Client(config["exchange"], config["auth"], config["quote"])
 
     args.func(client, args)
 

@@ -38,20 +38,20 @@ cx balance
 ```
 
 ```
-BTC     43.02
-LTC     0.81
-ETH     127.01
-XRP     5.24
-BCH     0.00
-CAD     163.99
-EOS     0.00
-XLM     0.00
-DOGE    73.88
-ADA     72.82
-USDT    30.34
-LINK    0.00
-DOT     0.00
-Total   517.11
+ADA	74.16
+BCH	0.00
+BTC	43.42
+DOGE	93.35
+DOT	0.00
+EOS	0.00
+ETH	127.53
+LINK	0.00
+LTC	0.82
+USDT	30.34
+XLM	0.00
+XRP	5.21
+Unused	144.30
+Total	519.12
 ```
 
 ### Buy currency

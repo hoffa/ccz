@@ -12,6 +12,7 @@ import ccxt  # type: ignore
 # TODO: Cache tickers
 # TODO: buy-all
 # TODO: sell-all
+# TODO: Sometimes failures hidden; e.g. cx buy xrp 10
 class Client:
     """Designed for intuitive fiat trading."""
 
@@ -69,15 +70,15 @@ class Client:
 
 def command_balance(client: Client, args: Namespace) -> None:
     for currency, amount in client.get_balance():
-        print(f"{currency}\t{amount:.2f}")
+        print(f"{currency.lower()}\t{amount:.2f}")
 
 
 def command_buy(client: Client, args: Namespace) -> None:
-    client.buy(args.currency, args.amount)
+    client.buy(args.currency.upper(), args.amount)
 
 
 def command_sell(client: Client, args: Namespace) -> None:
-    client.sell(args.symbol, args.amount)
+    client.sell(args.currency.upper(), args.amount)
 
 
 def main() -> None:
@@ -94,7 +95,7 @@ def main() -> None:
     parser_buy.set_defaults(func=command_buy)
 
     parser_sell = subparsers.add_parser("sell")
-    parser_sell.add_argument("symbol")
+    parser_sell.add_argument("currency")
     parser_sell.add_argument("amount", type=float)
     parser_sell.set_defaults(func=command_sell)
 
@@ -106,7 +107,11 @@ def main() -> None:
 
     with open(args.config) as f:
         config = json.load(f)
-    client = Client(config["exchange"], config["auth"], config["quote"])
+    client = Client(
+        config["exchange"].lower(),
+        config["auth"],
+        config["quote"].upper(),
+    )
 
     args.func(client, args)
 

@@ -18,8 +18,8 @@ Create a `config.json` with the exchange configuration:
 
 ```json
 {
-  "exchange": "ndax",
-  "quote": "CAD",
+  "exchange": "binance",
+  "quote": "cad",
   "auth": {
     "apiKey": "foo",
     "secret": "bar"
@@ -33,35 +33,35 @@ Create a `config.json` with the exchange configuration:
 
 ### Show balance
 
-``` bash
+```bash
 cx balance
 ```
 
 ```
-ADA	74.16
-BCH	0.00
-BTC	43.42
-DOGE	93.35
-DOT	0.00
-EOS	0.00
-ETH	127.53
-LINK	0.00
-LTC	0.82
-USDT	30.34
-XLM	0.00
-XRP	5.21
-Unused	144.30
-Total	519.12
+ada     74.11
+bch     0.00
+btc     43.71
+doge    94.06
+dot     0.00
+eos     0.00
+eth     127.98
+link    0.00
+ltc     0.82
+usdt    20.34
+xlm     0.00
+xrp     5.22
+unused  154.27
+total   520.51
 ```
 
 ### Buy currency
 
 ```
-cx buy BTC 50
+cx buy btc 50
 ```
 
 ### Sell currency
 
 ```
-cx sell BTC 50
+cx sell btc 50
 ```

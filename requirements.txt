@@ -1,1 +1,4 @@
 ccxt
+black
+flake8
+mypy

@@ -1,55 +1,85 @@
 #!/usr/bin/env python3
 
 import argparse
+from argparse import Namespace
 import json
 
-import ccxt
+import ccxt  # type: ignore
+
+from dataclasses import dataclass
+from typing import cast, Dict, List
 
 
-def print_float(x):
+@dataclass
+class Ticker:
+    bid: float
+    ask: float
+
+
+class Client:
+    def __init__(self, exchange: str, auth: Dict[str, str]) -> None:
+        self.client = getattr(ccxt, exchange)(auth)
+
+    def get_balance(self) -> Dict[str, float]:
+        return cast(Dict[str, float], self.client.fetch_balance()["free"])
+
+    def get_symbols(self) -> List[str]:
+        self.client.load_markets()
+        return cast(List[str], self.client.symbols)
+
+    def get_ticker(self, symbol: str) -> Ticker:
+        ticker = self.client.fetch_ticker(symbol)
+        return Ticker(ticker["bid"], ticker["ask"])
+
+    def buy(self, symbol: str, amount: float) -> None:
+        self.client.create_market_buy_order(symbol, amount)
+
+    def sell(self, symbol: str, amount: float) -> None:
+        self.client.create_market_sell_order(symbol, amount)
+
+
+def print_float(x: float) -> None:
     print(f"{x:.6f}")
 
 
-def command_balance(client, _):
-    balance = client.fetch_balance()
-    for currency, amount in balance["free"].items():
+def command_balance(client: Client, args: Namespace) -> None:
+    for currency, amount in client.get_balance().items():
         print(f"{currency}\t{amount}")
 
 
-def command_symbols(client, _):
-    client.load_markets()
-    for symbol in client.symbols:
+def command_symbols(client: Client, args: Namespace) -> None:
+    for symbol in client.get_symbols():
         print(symbol)
 
 
-def command_buy(client, args):
-    client.create_market_buy_order(args.symbol, args.amount)
+def command_buy(client: Client, args: Namespace) -> None:
+    client.buy(args.symbol, args.amount)
 
 
-def command_sell(client, args):
-    client.create_market_sell_order(args.symbol, args.amount)
+def command_sell(client: Client, args: Namespace) -> None:
+    client.sell(args.symbol, args.amount)
 
 
-def command_bid(client, args):
-    ticker = client.fetch_ticker(args.symbol)
-    print_float(ticker["bid"])
+def command_bid(client: Client, args: Namespace) -> None:
+    ticker = client.get_ticker(args.symbol)
+    print_float(ticker.bid)
 
 
-def command_ask(client, args):
-    ticker = client.fetch_ticker(args.symbol)
-    print_float(ticker["ask"])
+def command_ask(client: Client, args: Namespace) -> None:
+    ticker = client.get_ticker(args.symbol)
+    print_float(ticker.ask)
 
 
-def command_price(client, args):
-    ticker = client.fetch_ticker(args.symbol)
-    price = ticker[args.side]
+def command_price(client: Client, args: Namespace) -> None:
+    ticker = client.get_ticker(args.symbol)
+    price = ticker.bid if args.side == "bid" else ticker.ask
     if args.direction == "base":
         print_float(args.amount / price)
     else:
         print_float(args.amount * price)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="config.json")
     subparsers = parser.add_subparsers()
@@ -89,7 +119,7 @@ def main():
 
     with open(args.config) as f:
         config = json.load(f)
-    client = getattr(ccxt, config["exchange"])(config["auth"])
+    client = Client(config["exchange"], config["auth"])
 
     args.func(client, args)
 

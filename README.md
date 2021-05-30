@@ -19,6 +19,8 @@ Create a `config.json` with the exchange configuration:
 }
 ```
 
+`exchange` is the exchange ID as by [CCXT](https://github.com/ccxt/ccxt).
+
 ## Trading
 
 ### Show balance

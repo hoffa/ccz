@@ -1,3 +1,3 @@
 all:
-	flake8 --ignore E501 cx.py
-	mypy --strict cx.py
+	flake8 --ignore E501 cx
+	mypy --strict cx

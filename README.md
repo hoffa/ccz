@@ -8,6 +8,7 @@ All prices are in a fixed quote currency.
 
 ```bash
 git clone https://github.com/hoffa/cx.git
+cd cx
 python3 setup.py install
 ```
 

@@ -34,7 +34,6 @@ class Client:
         currencies = list(self._get_currencies())
         total = 0
         balance = self.client.fetch_balance()["free"]
-        yield self.quote, balance[self.quote]
         for currency, amount in sorted(balance.items()):
             if currency == self.quote:
                 total += amount
@@ -44,6 +43,7 @@ class Client:
                 quote_amount = amount * bid
                 yield currency, quote_amount
                 total += quote_amount
+        yield "Unused", balance[self.quote]
         yield "Total", total
 
     def buy(self, currency: str, amount: float) -> None:

@@ -13,8 +13,8 @@ Create a `config.json` with the exchange configuration:
   "exchange": "ndax",
   "quote": "CAD",
   "auth": {
-    "apiKey": "a1b2c3d4e5f6",
-    "secret": "f6e5d4c3b2a1"
+    "apiKey": "foo",
+    "secret": "bar"
   }
 }
 ```

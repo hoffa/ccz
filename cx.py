@@ -6,33 +6,32 @@ import json
 import ccxt
 
 
-def get_symbol(base, quote):
-    return f"{base}/{quote}".upper()
-
-
 def print_float(x):
     print(f"{x:.6f}")
 
 
-def command_balance(client, args):
+def command_balance(client, _):
     balance = client.fetch_balance()
-    symbol = args.quote.upper()
-    print(balance["total"][symbol])
+    for currency, amount in balance["free"].items():
+        print(f"{currency}\t{amount}")
+
+
+def command_symbols(client, _):
+    client.load_markets()
+    for symbol in client.symbols:
+        print(symbol)
 
 
 def command_buy(client, args):
-    symbol = get_symbol(args.base, args.quote)
-    client.create_market_buy_order(symbol, args.amount)
+    client.create_market_buy_order(args.symbol, args.amount)
 
 
 def command_sell(client, args):
-    symbol = get_symbol(args.base, args.quote)
-    client.create_market_sell_order(symbol, args.amount)
+    client.create_market_sell_order(args.symbol, args.amount)
 
 
 def command_price(client, args):
-    symbol = get_symbol(args.base, args.quote)
-    ticker = client.fetch_ticker(symbol)
+    ticker = client.fetch_ticker(args.symbol)
     price = ticker[args.side]
     if args.direction == "base":
         print_float(args.amount / price)
@@ -46,26 +45,25 @@ def main():
     subparsers = parser.add_subparsers()
 
     parser_balance = subparsers.add_parser("balance")
-    parser_balance.add_argument("quote")
     parser_balance.set_defaults(func=command_balance)
 
+    parser_symbols = subparsers.add_parser("symbols")
+    parser_symbols.set_defaults(func=command_symbols)
+
     parser_buy = subparsers.add_parser("buy")
-    parser_buy.add_argument("base")
-    parser_buy.add_argument("quote")
+    parser_buy.add_argument("symbol")
     parser_buy.add_argument("amount", type=float)
     parser_buy.set_defaults(func=command_buy)
 
     parser_sell = subparsers.add_parser("sell")
-    parser_sell.add_argument("base")
-    parser_sell.add_argument("quote")
+    parser_sell.add_argument("symbol")
     parser_sell.add_argument("amount", type=float)
     parser_sell.set_defaults(func=command_sell)
 
     parser_price = subparsers.add_parser("price")
     parser_price.add_argument("direction", choices=("base", "quote"))
     parser_price.add_argument("side", choices=("bid", "ask"))
-    parser_price.add_argument("base")
-    parser_price.add_argument("quote")
+    parser_price.add_argument("symbol")
     parser_price.add_argument("amount", type=float)
     parser_price.set_defaults(func=command_price)
 

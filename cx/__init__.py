@@ -12,6 +12,7 @@ import ccxt  # type: ignore
 # TODO: buy-all
 # TODO: sell-all
 # TODO: Sometimes failures hidden; e.g. cx buy xrp 10
+# TODO: dry run
 class Client:
     """Assumes currencies and symbols have correct capitalization."""
 
@@ -35,7 +36,7 @@ class Client:
 
     def get_balance(self) -> Iterator[Tuple[str, float]]:
         currencies = list(self._get_currencies())
-        total = 0
+        total = 0.0
         balance = self._get_balance()
         for currency, amount in sorted(balance.items()):
             if currency == self.quote:
@@ -49,8 +50,12 @@ class Client:
         yield "Unused", balance[self.quote]
         yield "Total", total
 
-    def buy(self, currency: str, amount: float) -> None:
+    # TODO: Refactor naming, amount ambiguity
+    def buy(self, currency: str, amount: float, percentage: bool) -> None:
         symbol = self._get_symbol(currency)
+        if percentage:
+            balance = self._get_balance()[self.quote]
+            amount = balance * (amount / 100)
         _, ask = self._get_ticker(symbol)
         base_amount = amount / ask
         self.client.create_market_buy_order(symbol, base_amount)
@@ -80,7 +85,7 @@ def command_balance(client: Client, args: Namespace) -> None:
 
 
 def command_buy(client: Client, args: Namespace) -> None:
-    client.buy(args.currency.upper(), args.amount)
+    client.buy(args.currency.upper(), args.amount, args.percentage)
 
 
 def command_sell(client: Client, args: Namespace) -> None:
@@ -96,14 +101,25 @@ def main() -> None:
     parser_balance.set_defaults(func=command_balance)
 
     parser_buy = subparsers.add_parser("buy")
-    parser_buy.add_argument("currency")
-    parser_buy.add_argument("amount", type=float)
+    parser_buy.add_argument("currency", help="currency to buy")
+    parser_buy.add_argument("amount", help="amount of currency to buy", type=float)
+    parser_buy.add_argument(
+        "-p",
+        help="treat amount as percentage if set",
+        dest="percentage",
+        action="store_true",
+    )
     parser_buy.set_defaults(func=command_buy)
 
     parser_sell = subparsers.add_parser("sell")
     parser_sell.add_argument("currency")
     parser_sell.add_argument("amount", type=float)
-    parser_sell.add_argument("-p", dest="percentage", action="store_true")
+    parser_sell.add_argument(
+        "-p",
+        help="treat amount as percentage if set",
+        dest="percentage",
+        action="store_true",
+    )
     parser_sell.set_defaults(func=command_sell)
 
     args = parser.parse_args()

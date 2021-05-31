@@ -9,8 +9,6 @@ from typing import cast, Dict, Iterator, Tuple
 import ccxt  # type: ignore
 
 
-# TODO: buy-all
-# TODO: sell-all
 # TODO: Sometimes failures hidden; e.g. cx buy xrp 10
 # TODO: dry run
 class Client:
@@ -94,29 +92,57 @@ def command_sell(client: Client, args: Namespace) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c", dest="config", default="config.json")
+    parser.add_argument(
+        "-c",
+        help="configuration file path",
+        dest="config",
+        default="config.json",
+    )
     subparsers = parser.add_subparsers(dest="cmd")
 
-    parser_balance = subparsers.add_parser("balance")
+    parser_balance = subparsers.add_parser(
+        "balance",
+        help="show balance",
+    )
     parser_balance.set_defaults(func=command_balance)
 
-    parser_buy = subparsers.add_parser("buy")
-    parser_buy.add_argument("currency", help="currency to buy")
-    parser_buy.add_argument("amount", help="amount of currency to buy", type=float)
+    parser_buy = subparsers.add_parser(
+        "buy",
+        help="buy currency",
+    )
+    parser_buy.add_argument(
+        "currency",
+        help="currency to buy",
+    )
+    parser_buy.add_argument(
+        "amount",
+        help="amount to buy",
+        type=float,
+    )
     parser_buy.add_argument(
         "-p",
-        help="treat amount as percentage if set",
+        help="treat amount as percentage",
         dest="percentage",
         action="store_true",
     )
     parser_buy.set_defaults(func=command_buy)
 
-    parser_sell = subparsers.add_parser("sell")
-    parser_sell.add_argument("currency")
-    parser_sell.add_argument("amount", type=float)
+    parser_sell = subparsers.add_parser(
+        "sell",
+        help="sell currency",
+    )
+    parser_sell.add_argument(
+        "currency",
+        help="currency to sell",
+    )
+    parser_sell.add_argument(
+        "amount",
+        help="amount to sell",
+        type=float,
+    )
     parser_sell.add_argument(
         "-p",
-        help="treat amount as percentage if set",
+        help="treat amount as percentage",
         dest="percentage",
         action="store_true",
     )

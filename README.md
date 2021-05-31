@@ -2,7 +2,7 @@
 
 Intuitive cryptocurrency trading.
 
-All prices are in a fixed quote currency.
+Quote currency is fixed.
 
 ## Installation
 
@@ -57,12 +57,28 @@ total   520.51
 
 ### Buy currency
 
+Buy in quote currency:
+
 ```
 cx buy btc 50
 ```
 
+Buy with percentage of available quote currency:
+
+```
+cx buy btc 50 -p
+```
+
 ### Sell currency
+
+Sell by equivalent in quote currency:
 
 ```
 cx sell btc 50
+```
+
+Sell by percentage of available base currency:
+
+```
+cx sell btc 50 -p
 ```

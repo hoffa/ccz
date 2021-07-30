@@ -9,8 +9,6 @@ from typing import cast, Dict, Iterator, Tuple
 import ccxt  # type: ignore
 
 
-# TODO: Sometimes failures hidden; e.g. cx buy xrp 10
-# TODO: dry run
 class Client:
     """Assumes currencies and symbols have correct capitalization."""
 
@@ -48,7 +46,6 @@ class Client:
         yield "Unused", balance[self.quote]
         yield "Total", total
 
-    # TODO: Refactor naming, amount ambiguity
     def buy(self, currency: str, amount: float, percentage: bool) -> None:
         symbol = self._get_symbol(currency)
         if percentage:

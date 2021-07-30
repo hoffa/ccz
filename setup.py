@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="cx",
-    version="0.2.0",
+    name="ccz",
+    version="0.3.1",
     install_requires=["ccxt"],
     packages=find_packages(),
-    entry_points={"console_scripts": ["cx=cx:main"]},
+    entry_points={"console_scripts": ["ccz=ccz:main"]},
     python_requires=">=3.6",
 )

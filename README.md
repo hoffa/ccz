@@ -1,4 +1,4 @@
-# cx
+# ccz
 
 Intuitive cryptocurrency trading.
 
@@ -6,10 +6,8 @@ Quote currency is fixed.
 
 ## Installation
 
-```bash
-git clone https://github.com/hoffa/cx.git
-cd cx
-python setup.py install
+```
+pip install ccz
 ```
 
 ## Setup
@@ -35,7 +33,7 @@ Create a `config.json` with the exchange configuration:
 ### Show balance
 
 ```bash
-cx balance
+ccz balance
 ```
 
 ```
@@ -60,13 +58,13 @@ total   520.51
 Buy in quote currency:
 
 ```
-cx buy btc 50
+ccz buy btc 50
 ```
 
 Buy with percentage of available quote currency:
 
 ```
-cx buy btc 50 -p
+ccz buy btc 50 -p
 ```
 
 ### Sell currency
@@ -74,11 +72,11 @@ cx buy btc 50 -p
 Sell by equivalent in quote currency:
 
 ```
-cx sell btc 50
+ccz sell btc 50
 ```
 
 Sell by percentage of available base currency:
 
 ```
-cx sell btc 50 -p
+ccz sell btc 50 -p
 ```
